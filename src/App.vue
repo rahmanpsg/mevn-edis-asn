@@ -1,32 +1,25 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
+  <v-app>
     <router-view />
-  </div>
+  </v-app>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+export default {
+  name: "App",
+};
+</script>
 
-#nav {
-  padding: 30px;
-}
+<style lang="scss">
+@import url("https://fonts.googleapis.com/css?family=Questrial");
 
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
+$font-family: "Ubuntu";
 
-#nav a.router-link-exact-active {
-  color: #42b983;
+.v-application {
+  [class*="text-"] {
+    color: #36405a;
+    font-family: "Questrial", $font-family, sans-serif !important;
+  }
+  font-family: "Questrial", $font-family, sans-serif !important;
 }
 </style>
