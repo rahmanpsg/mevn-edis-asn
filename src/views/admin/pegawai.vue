@@ -8,8 +8,8 @@
           @hapus="showDialogHapus"
           :headers="headers"
           :items="items"
-          itemKey="nik"
-          sortBy="nik"
+          itemKey="nip"
+          sortBy="nip"
           :loading="loading"
           :dialogDelete="dialogDelete"
         >
@@ -26,10 +26,10 @@
                   <v-row>
                     <v-col cols="12" sm="6" md="6">
                       <v-text-field
-                        v-model="editedItem.nik"
+                        v-model="editedItem.nip"
                         type="number"
-                        label="NIK*"
-                        :rules="nikRules"
+                        label="NIP*"
+                        :rules="nipRules"
                         required
                       ></v-text-field>
                     </v-col>
@@ -39,6 +39,19 @@
                         label="Nama*"
                         :rules="[(v) => !!v || 'Nama tidak boleh kosong']"
                         required
+                      ></v-text-field>
+                    </v-col>
+
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.gelar_depan"
+                        label="Gelar Depan"
+                      ></v-text-field>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.gelar_belakang"
+                        label="Gelar Belakang"
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="6">
@@ -58,45 +71,50 @@
                         required
                       ></v-text-field>
                     </v-col>
-                    <v-col cols="12" sm="2" md="2">
-                      <v-btn
-                        color="primary"
-                        :disabled="editedItem.image != undefined"
-                        @click="$refs.uploader.click()"
+                    <v-col cols="12" sm="6" md="6">
+                      <v-autocomplete
+                        v-model="editedItem.golongan"
+                        label="Pangkat / Golongan*"
+                        :items="golongans"
+                        item-text="golongan"
+                        return-object
+                        :rules="[(v) => !!v || 'Golongan belum dipilih']"
+                        required
                       >
-                        Tambah Image
-                        <v-icon right> mdi-plus </v-icon>
-                      </v-btn>
-                      <input
-                        ref="uploader"
-                        class="d-none"
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        @change="onFileChanged"
-                      />
+                        <template v-slot:item="data">
+                          {{ data.item.golongan }} - {{ data.item.pangkat }}
+                        </template>
+                      </v-autocomplete>
                     </v-col>
-                  </v-row>
-
-                  <v-row
-                    justify="space-around"
-                    v-if="editedItem.image != undefined"
-                  >
-                    <v-col cols="4">
-                      <div class="title mb-1">
-                        <v-btn
-                          small
-                          color="error"
-                          @click="editedItem.image = undefined"
-                        >
-                          Hapus
-                          <v-icon right> mdi-delete </v-icon>
-                        </v-btn>
-                      </div>
-                      <v-img
-                        :src="`data:image/jpeg;base64,${editedItem.image}`"
-                        aspect-ratio="1.1"
-                      ></v-img>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-autocomplete
+                        v-model="editedItem.unor"
+                        label="Unit Organisasi*"
+                        :items="unors"
+                        item-text="nama"
+                        return-object
+                        :rules="[(v) => !!v || 'Unit Organisasi belum dipilih']"
+                        required
+                      >
+                        <template v-slot:item="data">
+                          <template v-if="typeof data.item !== 'object'">
+                            <v-list-tile-content
+                              v-text="data.item"
+                            ></v-list-tile-content>
+                          </template>
+                          <template v-else>
+                            {{ data.item.nama }}
+                          </template>
+                        </template>
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="6">
+                      <v-text-field
+                        v-model="editedItem.jabatan"
+                        label="Jabatan*"
+                        :rules="[(v) => !!v || 'Jabatan tidak boleh kosong']"
+                        required
+                      ></v-text-field>
                     </v-col>
                   </v-row>
                 </v-form>
@@ -147,6 +165,8 @@ export default {
         { text: "NIP", value: "nip" },
         { text: "Nama", value: "nama" },
         { text: "Username", value: "username" },
+        { text: "Golongan", value: "golongan.golongan" },
+        { text: "Unit Organisasi", value: "unor.nama" },
         { text: "Aksi", value: "aksi", sortable: false },
       ],
       dialog: false,
@@ -160,26 +180,32 @@ export default {
     };
   },
   async created() {
-    // await this.getAll();
+    await this.getAll();
+    await this.getAllGolongan();
+    await this.getUnorList();
+
     this.loading = false;
   },
   computed: {
-    ...mapState("karyawanModule", {
-      items: "karyawans",
+    ...mapState("pegawaiModule", {
+      items: "pegawais",
     }),
+    ...mapState("golonganModule", { golongans: "golongans" }),
+    ...mapState("unorModule", { unors: "unors" }),
     formTitle() {
       return this.editedIndex === -1
         ? "Tambah Data Pegawai"
         : "Edit Data Pegawai";
     },
-    nikRules() {
+    nipRules() {
       return [
-        (v) => !!v || "NIK tidak boleh kosong",
+        (v) => !!v || "NIP tidak boleh kosong",
+        (v) => (v && v.length >= 18) || "NIP minimal 18 karakter",
         (v) => {
           return (
-            (this.editedIndex != -1 && this.items[this.editedIndex].nik == v) ||
-            !this.items.find((item) => item.nik == v) ||
-            "NIK telah digunakan"
+            (this.editedIndex != -1 && this.items[this.editedIndex].nip == v) ||
+            !this.items.find((item) => item.nip == v) ||
+            "NIP telah digunakan"
           );
         },
       ];
@@ -200,26 +226,14 @@ export default {
     },
   },
   methods: {
-    ...mapActions("karyawanModule", [
+    ...mapActions("pegawaiModule", [
       "getAll",
-      "addKaryawan",
-      "editKaryawan",
-      "deleteKaryawan",
+      "addPegawai",
+      "editPegawai",
+      "deletePegawai",
     ]),
-    onFileChanged(e) {
-      for (const image of e.target.files) {
-        this.createBase64(image);
-      }
-    },
-    createBase64(file) {
-      const reader = new FileReader();
-
-      reader.onload = (e) => {
-        this.editedItem.image = e.target.result.split(",").pop();
-      };
-
-      reader.readAsDataURL(file);
-    },
+    ...mapActions("golonganModule", { getAllGolongan: "getAll" }),
+    ...mapActions("unorModule", { getUnorList: "getUnorList" }),
     tambah() {
       this.editedItem = new PegawaiModel({});
 
@@ -242,7 +256,7 @@ export default {
       this.dialogDelete = true;
     },
     async hapus() {
-      const res = await this.deleteKaryawan({
+      const res = await this.deletePegawai({
         index: this.editedIndex,
         id: this.editedItem._id,
       });
@@ -260,12 +274,12 @@ export default {
 
       let res;
       if (this.editedIndex > -1) {
-        res = await this.editKaryawan({
+        res = await this.editPegawai({
           index: this.editedIndex,
-          karyawan: this.editedItem,
+          pegawai: this.editedItem,
         });
       } else {
-        res = await this.addKaryawan(this.editedItem);
+        res = await this.addPegawai(this.editedItem);
       }
 
       this.response = { show: true, text: res.data.message };

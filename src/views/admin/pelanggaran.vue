@@ -8,8 +8,8 @@
           @hapus="showDialogHapus"
           :headers="headers"
           :items="items"
-          itemKey="golongan"
-          sortBy="golongan"
+          itemKey="_id"
+          sortBy="tanggal"
           :loading="loading"
           :dialogDelete="dialogDelete"
         >
@@ -25,20 +25,58 @@
                 <v-form ref="form" v-model="valid" lazy-validation>
                   <v-row>
                     <v-col cols="12">
+                      <v-autocomplete
+                        v-model="editedItem.pegawai"
+                        label="Pegawai*"
+                        :items="listPegawai"
+                        item-text="namaWithGelar"
+                        return-object
+                        :rules="[(v) => !!v || 'Pegawai belum dipilih']"
+                        required
+                      >
+                        <template v-slot:item="data">
+                          <v-list>
+                            <v-list-item two-line>
+                              <v-list-item-content>
+                                <v-list-item-title>
+                                  {{ data.item.namaWithGelar }}
+                                </v-list-item-title>
+                                <v-list-item-subtitle>
+                                  {{ data.item.nip }}
+                                </v-list-item-subtitle>
+                              </v-list-item-content>
+                            </v-list-item>
+                          </v-list>
+                        </template>
+                      </v-autocomplete>
+                    </v-col>
+                    <v-col cols="12">
+                      <v-combobox
+                        v-model="editedItem.jenis"
+                        :items="[`Disiplin`, `Pidana`]"
+                        label="Jenis Pelanggaran*"
+                        :rules="[
+                          (v) => !!v || 'Jenis pelanggaran belum dipilih',
+                        ]"
+                        required
+                      ></v-combobox>
+                    </v-col>
+                    <v-col cols="12">
                       <v-text-field
-                        v-model="editedItem.golongan"
-                        label="Golongan*"
-                        :rules="golRules"
+                        v-model="editedItem.tanggal"
+                        type="date"
+                        label="Tanggal*"
+                        :rules="[(v) => !!v || 'Tanggal tidak boleh kosong']"
                         required
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-text-field
-                        v-model="editedItem.pangkat"
-                        label="Pangkat*"
-                        :rules="[(v) => !!v || 'Pangkat tidak boleh kosong']"
+                      <v-textarea
+                        v-model="editedItem.keterangan"
+                        label="Keterangan*"
+                        :rules="[(v) => !!v || 'Keterangan tidak boleh kosong']"
                         required
-                      ></v-text-field>
+                      ></v-textarea>
                     </v-col>
                   </v-row>
                 </v-form>
@@ -67,7 +105,7 @@ import DialogCustom from "@/components/DialogCustom.vue";
 import SnackbarResponse from "@/components/SnackbarResponse.vue";
 import { mapState, mapActions } from "vuex";
 
-import GolonganModel from "@/models/golongan";
+import PelanggaranModel from "@/models/pelanggaran";
 
 export default {
   components: {
@@ -86,15 +124,18 @@ export default {
           sortable: false,
           value: "index",
         },
-        { text: "Golongan", value: "golongan" },
-        { text: "Pangkat", value: "pangkat" },
+        { text: "NIP", value: "pegawai.nip" },
+        { text: "Nama", value: "pegawai.nama" },
+        { text: "Jenis Pelanggaran", value: "jenis" },
+        { text: "Tanggal", value: "tanggal" },
+        { text: "Keterangan", value: "keterangan" },
         { text: "Aksi", value: "aksi", sortable: false },
       ],
       dialog: false,
       dialogLoading: false,
       dialogDelete: false,
       editedIndex: -1,
-      editedItem: new GolonganModel({}),
+      editedItem: new PelanggaranModel({}),
       valid: true,
       response: { show: false, text: "" },
       alertImage: false,
@@ -102,39 +143,45 @@ export default {
   },
   async created() {
     await this.getAll();
+    await this.getListPegawai();
+
     this.loading = false;
   },
   computed: {
-    ...mapState("golonganModule", {
-      items: "golongans",
+    ...mapState("pelanggaranModule", {
+      items: "pelanggarans",
+    }),
+    ...mapState("pegawaiModule", {
+      listPegawai: "pegawais",
     }),
     formTitle() {
       return this.editedIndex === -1
-        ? "Tambah Data Golongan"
-        : "Edit Data Golongan";
+        ? "Tambah Data Pelanggaran"
+        : "Edit Data Pelanggaran";
     },
     golRules() {
       return [
-        (v) => !!v || "Golongan tidak boleh kosong",
+        (v) => !!v || "Pelanggaran tidak boleh kosong",
         (v) => {
           return (
             (this.editedIndex != -1 && this.items[this.editedIndex].nik == v) ||
             !this.items.find((item) => item.nik == v) ||
-            "Golongan telah ada"
+            "Pelanggaran telah ada"
           );
         },
       ];
     },
   },
   methods: {
-    ...mapActions("golonganModule", [
+    ...mapActions("pelanggaranModule", [
       "getAll",
-      "addGolongan",
-      "editGolongan",
-      "deleteGolongan",
+      "addPelanggaran",
+      "editPelanggaran",
+      "deletePelanggaran",
     ]),
+    ...mapActions("pegawaiModule", ["getListPegawai"]),
     tambah() {
-      this.editedItem = new GolonganModel({});
+      this.editedItem = new PelanggaranModel({});
 
       this.dialog = true;
 
@@ -144,18 +191,21 @@ export default {
     },
     edit(item) {
       this.editedIndex = this.items.indexOf(item);
-      this.editedItem = new GolonganModel(item);
+      this.editedItem = new PelanggaranModel({
+        ...item,
+        pegawai: this.listPegawai.find((p) => p._id == item.pegawai._id),
+      });
 
       this.dialog = true;
     },
     showDialogHapus(item) {
       this.editedIndex = this.items.indexOf(item);
-      this.editedItem = new GolonganModel(item);
+      this.editedItem = new PelanggaranModel(item);
 
       this.dialogDelete = true;
     },
     async hapus() {
-      const res = await this.deleteGolongan({
+      const res = await this.deletePelanggaran({
         index: this.editedIndex,
         id: this.editedItem._id,
       });
@@ -173,12 +223,12 @@ export default {
 
       let res;
       if (this.editedIndex > -1) {
-        res = await this.editGolongan({
+        res = await this.editPelanggaran({
           index: this.editedIndex,
-          golongan: this.editedItem,
+          pelanggaran: this.editedItem,
         });
       } else {
-        res = await this.addGolongan(this.editedItem);
+        res = await this.addPelanggaran(this.editedItem);
       }
 
       this.response = { show: true, text: res.data.message };
@@ -191,7 +241,7 @@ export default {
       this.dialogDelete = false;
 
       this.$nextTick(() => {
-        this.editedItem = new GolonganModel({});
+        this.editedItem = new PelanggaranModel({});
         this.editedIndex = -1;
       });
     },

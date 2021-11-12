@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const schema = mongoose.Schema({
   nama: String,
-  intansi: {
+  unor_induk: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UnorInduk",
   },

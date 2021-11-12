@@ -14,7 +14,10 @@ app.use(bodyParser.json({ limit: "10mb", extended: true }));
 app.use(cors());
 
 const loginRoute = require("./routes/login");
+const pegawaiRoute = require("./routes/pegawai");
+const pelanggaranRoute = require("./routes/pelanggaran");
 const golonganRoute = require("./routes/golongan");
+const unorRoute = require("./routes/unor");
 
 app.use(express.static("./dist/"));
 
@@ -23,6 +26,9 @@ app.get("/", (req, res) => {
 });
 
 app.use("/login", loginRoute);
+app.use("/pegawai", pegawaiRoute);
+app.use("/pelanggaran", pelanggaranRoute);
 app.use("/golongan", golonganRoute);
+app.use("/unor", unorRoute);
 
 module.exports = app;

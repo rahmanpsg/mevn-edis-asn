@@ -7,8 +7,6 @@ Vue.use(VueRouter);
 const isLogin = (to, from, next) => {
   const { login, role } = store.state.userModule;
 
-  console.log(to.name);
-
   if (to.name == "Login") {
     if (login) next(role);
   } else {
@@ -50,8 +48,16 @@ const routes = [
         component: () => import("../views/admin/pegawai.vue"),
       },
       {
+        path: "pelanggaran",
+        component: () => import("../views/admin/pelanggaran.vue"),
+      },
+      {
         path: "golongan",
         component: () => import("../views/admin/golongan.vue"),
+      },
+      {
+        path: "unor",
+        component: () => import("../views/admin/unor.vue"),
       },
     ],
   },

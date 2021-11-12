@@ -1,41 +1,43 @@
 const express = require("express");
-const golonganModel = require("../models/golongan");
+const pelanggaranModel = require("../models/pelanggaran");
 const router = express.Router();
 const auth = require("../middleware/auth");
 
-// get all data golongan
+// get all data pelanggaran
 router.get("/", auth, async (req, res) => {
-  const data = await golonganModel.find();
+  const data = await pelanggaranModel.find().populate("pegawai", "nip nama");
 
   res.send(data);
 });
 
-// save data golongan
+// save data pelanggaran
 router.post("/", auth, async (req, res) => {
-  const { golongan, pangkat } = req.body;
+  const { pegawai, jenis, tanggal, keterangan } = req.body;
 
-  const users = new golonganModel({
-    golongan,
-    pangkat,
+  const pelanggarans = new pelanggaranModel({
+    pegawai,
+    jenis,
+    tanggal,
+    keterangan,
   });
 
-  users.save((err, doc) => {
+  pelanggarans.save((err, doc) => {
     if (err) return res.status(500).send({ message: err });
 
     res.status(200).send({
-      message: "Data golongan berhasil disimpan",
+      message: "Data pelanggaran berhasil disimpan",
       id: doc._id,
     });
   });
 });
 
-// ubah data golongan
+// ubah data pelanggaran
 router.put("/", auth, async (req, res) => {
-  const { _id, golongan, pangkat } = req.body;
+  const { _id, pegawai, jenis, tanggal, keterangan } = req.body;
 
-  const newData = { golongan, pangkat };
+  const newData = { pegawai, jenis, tanggal, keterangan };
 
-  golonganModel.findByIdAndUpdate(
+  pelanggaranModel.findByIdAndUpdate(
     _id,
     newData,
     { useFindAndModify: false },
@@ -43,13 +45,13 @@ router.put("/", auth, async (req, res) => {
       if (err) return res.status(500).send({ message: err });
 
       res.status(200).send({
-        message: "Golongan berhasil diubah",
+        message: "Pelanggaran berhasil diubah",
       });
     }
   );
 });
 
-// hapus data golongan
+// hapus data pelanggaran
 router.delete("/:id", auth, async (req, res) => {
   const _id = req.params.id;
 
@@ -57,11 +59,11 @@ router.delete("/:id", auth, async (req, res) => {
     return res.status(404).send({ message: "ID tidak ditemukan" });
   }
 
-  golonganModel.deleteOne({ _id }, (err) => {
+  pelanggaranModel.deleteOne({ _id }, (err) => {
     if (err) return res.status(500).send({ message: err });
 
     res.status(200).send({
-      message: "Golongan berhasil dihapus",
+      message: "Pelanggaran berhasil dihapus",
     });
   });
 });

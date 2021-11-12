@@ -28,23 +28,41 @@
       :show-expand="expanded"
       :single-expand="true"
       :sort-by="sortBy"
+      :show-select="showSelect"
+      single-select
+      @click:row="selectRow"
     >
       <template v-slot:[`item.index`]="{ index }">
         {{ index + 1 }}
+      </template>
+
+      <template v-slot:[`item.nama`]="{ item }">
+        {{ item.gelar_depan }}
+        {{ item.nama + (item.gelar_belakang ? "," : "") }}
+        {{ item.gelar_belakang }}
+      </template>
+
+      <template v-slot:[`item.jenis`]="{ item }">
+        <v-chip
+          class="overline font-weight-bold"
+          :color="item.jenis == 'Pidana' ? 'error' : 'warning'"
+          dark
+        >
+          {{ item.jenis }}
+        </v-chip>
       </template>
 
       <template v-slot:[`item.aksi`]="{ item }">
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-icon
-              small
               class="mr-2"
               v-bind="attrs"
               v-on="on"
-              color="success"
+              color="warning"
               @click.stop="$emit('edit', item)"
             >
-              mdi-pencil
+              mdi-archive-edit-outline
             </v-icon>
           </template>
           <span>Edit Data</span>
@@ -53,35 +71,16 @@
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">
             <v-icon
-              small
               v-bind="attrs"
               v-on="on"
-              color="primary"
+              color="error"
               @click.stop="$emit('hapus', item)"
             >
-              mdi-delete
+              mdi-delete-forever-outline
             </v-icon>
           </template>
           <span>Hapus Data</span>
         </v-tooltip>
-      </template>
-
-      <template v-slot:expanded-item="{ headers, item }">
-        <td :colspan="headers.length" class="py-4">
-          <v-row>
-            <v-col cols="12" v-for="(jawaban, i) in item.jawaban" :key="i">
-              <v-row>
-                <v-col
-                  cols="1"
-                  class="text-md-body-1 font-weight-bold text-uppercase"
-                  v-text="i"
-                ></v-col>
-                <v-col cols="1">:</v-col>
-                <v-col cols="10">{{ jawaban }}</v-col>
-              </v-row>
-            </v-col>
-          </v-row>
-        </td>
       </template>
 
       <template v-slot:top>
@@ -101,11 +100,18 @@ export default {
     groupBy: String,
     loading: Boolean,
     expanded: Boolean,
-    btnImage: Boolean,
+    showSelect: Boolean,
+    selectedFilter: String,
   },
   data: () => ({
     search: "",
   }),
+  methods: {
+    selectRow(item, row) {
+      row.select(!row.isSelected);
+      this.$emit("update:selectedFilter", !row.isSelected ? item._id : null);
+    },
+  },
 };
 </script>
 

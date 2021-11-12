@@ -94,9 +94,6 @@ export default {
       ],
     };
   },
-  created() {
-    console.log(this.$route);
-  },
   computed: {
     ...mapState("userModule", { nama: "nama" }),
     selectedItem() {

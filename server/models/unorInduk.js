@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const schema = mongoose.Schema({
-  nama: String,
+  unor_induk: String,
 });
 
 module.exports = mongoose.model("UnorInduk", schema);
