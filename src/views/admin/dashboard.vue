@@ -68,7 +68,7 @@
               <h5 class="text-truncate text-uppercase">
                 Permohonan Sedang Diproses
               </h5>
-              <h1>{{ totalPermohonan }}</h1>
+              <h1>{{ totalPermohonanDiproses }}</h1>
             </div>
           </v-row>
         </v-card>
@@ -85,7 +85,7 @@
             </div>
             <div class="col pa-3 py-4 success--text">
               <h5 class="text-truncate text-uppercase">Permohonan Diterima</h5>
-              <h1>{{ totalPermohonan }}</h1>
+              <h1>{{ totalPermohonanDiterima }}</h1>
             </div>
           </v-row>
         </v-card>
@@ -102,7 +102,7 @@
             </div>
             <div class="col pa-3 py-4 error--text">
               <h5 class="text-truncate text-uppercase">Permohonan Ditolak</h5>
-              <h1>{{ belumPermohonan }}</h1>
+              <h1>{{ totalPermohonanDitolak }}</h1>
             </div>
           </v-row>
         </v-card>
@@ -114,14 +114,15 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-// import { mapState, mapActions } from "vuex";
 
 export default {
   components: {},
   data: () => ({
     totalPegawai: 0,
     totalPermohonan: 0,
-    belumPermohonan: 0,
+    totalPermohonanDiproses: 0,
+    totalPermohonanDiterima: 0,
+    totalPermohonanDitolak: 0,
     loading: true,
     headers: [
       {
@@ -140,8 +141,9 @@ export default {
     ],
   }),
   async created() {
+    this.loading = true;
     // await this.resetPermohonans();
-    // this.loadData();
+    await this.loadData();
     // await this.getAll();
     this.loading = false;
   },
@@ -157,11 +159,19 @@ export default {
     async loadData() {
       const res = await axios("total");
 
-      const { totalPegawai, totalPermohonan, belumPermohonan } = res.data;
+      const {
+        totalPegawai,
+        totalPermohonan,
+        totalPermohonanDiproses,
+        totalPermohonanDiterima,
+        totalPermohonanDitolak,
+      } = res.data;
 
       this.totalPegawai = totalPegawai;
       this.totalPermohonan = totalPermohonan;
-      this.belumPermohonan = belumPermohonan;
+      this.totalPermohonanDiproses = totalPermohonanDiproses;
+      this.totalPermohonanDiterima = totalPermohonanDiterima;
+      this.totalPermohonanDitolak = totalPermohonanDitolak;
     },
   },
 };

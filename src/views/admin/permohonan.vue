@@ -9,7 +9,7 @@
           :headers="headers"
           :items="items"
           itemKey="_id"
-          sortBy="tanggal"
+          sortBy="createdAt"
           :loading="loading"
           :dialogDelete="dialogDelete"
         >
@@ -54,9 +54,9 @@
                       <v-combobox
                         v-model="editedItem.jenis"
                         :items="[`Disiplin`, `Pidana`]"
-                        label="Jenis Pelanggaran*"
+                        label="Jenis Permohonan*"
                         :rules="[
-                          (v) => !!v || 'Jenis pelanggaran belum dipilih',
+                          (v) => !!v || 'Jenis permohonan belum dipilih',
                         ]"
                         required
                       ></v-combobox>
@@ -105,7 +105,7 @@ import DialogCustom from "@/components/DialogCustom.vue";
 import SnackbarResponse from "@/components/SnackbarResponse.vue";
 import { mapState, mapActions } from "vuex";
 
-import PelanggaranModel from "@/models/pelanggaran";
+import PermohonanModel from "@/models/permohonan";
 
 export default {
   components: {
@@ -124,17 +124,17 @@ export default {
           sortable: false,
           value: "index",
         },
-        { text: "Tanggal", value: "tanggal" },
-        { text: "Jenis permohonan", value: "jenis" },
+        { text: "Waktu Permohonan", value: "createdAt" },
+        { text: "Jenis Permohonan", value: "jenis" },
         { text: "Nama", value: "pegawai.nama" },
         { text: "Status", value: "status" },
-        { text: "Aksi", value: "aksi", sortable: false },
+        { text: "Keterangan", value: "keterangan" },
       ],
       dialog: false,
       dialogLoading: false,
       dialogDelete: false,
       editedIndex: -1,
-      editedItem: new PelanggaranModel({}),
+      editedItem: new PermohonanModel({}),
       valid: true,
       response: { show: false, text: "" },
       alertImage: false,
@@ -147,40 +147,40 @@ export default {
     this.loading = false;
   },
   computed: {
-    ...mapState("pelanggaranModule", {
-      items: "pelanggarans",
+    ...mapState("permohonanModule", {
+      items: "permohonans",
     }),
     ...mapState("pegawaiModule", {
       listPegawai: "pegawais",
     }),
     formTitle() {
       return this.editedIndex === -1
-        ? "Tambah Data Pelanggaran"
-        : "Edit Data Pelanggaran";
+        ? "Tambah Data Permohonan"
+        : "Edit Data Permohonan";
     },
     golRules() {
       return [
-        (v) => !!v || "Pelanggaran tidak boleh kosong",
+        (v) => !!v || "Permohonan tidak boleh kosong",
         (v) => {
           return (
             (this.editedIndex != -1 && this.items[this.editedIndex].nik == v) ||
             !this.items.find((item) => item.nik == v) ||
-            "Pelanggaran telah ada"
+            "Permohonan telah ada"
           );
         },
       ];
     },
   },
   methods: {
-    ...mapActions("pelanggaranModule", [
+    ...mapActions("permohonanModule", [
       "getAll",
-      "addPelanggaran",
-      "editPelanggaran",
-      "deletePelanggaran",
+      "addPermohonan",
+      "editPermohonan",
+      "deletePermohonan",
     ]),
     ...mapActions("pegawaiModule", ["getListPegawai"]),
     tambah() {
-      this.editedItem = new PelanggaranModel({});
+      this.editedItem = new PermohonanModel({});
 
       this.dialog = true;
 
@@ -190,7 +190,7 @@ export default {
     },
     edit(item) {
       this.editedIndex = this.items.indexOf(item);
-      this.editedItem = new PelanggaranModel({
+      this.editedItem = new PermohonanModel({
         ...item,
         pegawai: this.listPegawai.find((p) => p._id == item.pegawai._id),
       });
@@ -199,12 +199,12 @@ export default {
     },
     showDialogHapus(item) {
       this.editedIndex = this.items.indexOf(item);
-      this.editedItem = new PelanggaranModel(item);
+      this.editedItem = new PermohonanModel(item);
 
       this.dialogDelete = true;
     },
     async hapus() {
-      const res = await this.deletePelanggaran({
+      const res = await this.deletePermohonan({
         index: this.editedIndex,
         id: this.editedItem._id,
       });
@@ -222,12 +222,12 @@ export default {
 
       let res;
       if (this.editedIndex > -1) {
-        res = await this.editPelanggaran({
+        res = await this.editPermohonan({
           index: this.editedIndex,
-          pelanggaran: this.editedItem,
+          permohonan: this.editedItem,
         });
       } else {
-        res = await this.addPelanggaran(this.editedItem);
+        res = await this.addPermohonan(this.editedItem);
       }
 
       this.response = { show: true, text: res.data.message };
@@ -240,7 +240,7 @@ export default {
       this.dialogDelete = false;
 
       this.$nextTick(() => {
-        this.editedItem = new PelanggaranModel({});
+        this.editedItem = new PermohonanModel({});
         this.editedIndex = -1;
       });
     },

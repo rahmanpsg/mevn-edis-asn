@@ -1,8 +1,8 @@
 class VerifikatorModel {
-  constructor({ _id, pegawai, level }) {
+  constructor({ _id, pegawai, tahap }) {
     this._id = _id;
     this.pegawai = pegawai;
-    this.level = level;
+    this.tahap = tahap;
   }
 }
 

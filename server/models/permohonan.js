@@ -7,7 +7,6 @@ const schema = mongoose.Schema(
       ref: "User",
     },
     jenis: String,
-    tanggal: String,
   },
   { timestamps: true }
 );

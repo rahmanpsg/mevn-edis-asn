@@ -41,10 +41,21 @@
               :key="`${n}-step`"
               :step="n"
               :rules="[() => stepRules[n - 1]]"
-              editable
+              :editable="stepItem[n - 1].pegawai == null"
+              :complete="stepItem[n - 1].pegawai != null"
             >
-              Pilih Verifikator Tingkat {{ n }}
-              <small v-text="headers[n - 1]"></small>
+              Verifikator Tahap {{ n }}
+              <small class="font-weight-bold" v-text="headers[n - 1]"></small>
+              <template v-if="stepItem[n - 1].pegawai != null">
+                <small
+                  v-text="`Nama : ${stepItem[n - 1].pegawai.namaWithGelar}`"
+                  class="ml-2"
+                ></small>
+                <small
+                  v-text="`NIP : ${stepItem[n - 1].pegawai.nip}`"
+                  class="ml-2"
+                ></small>
+              </template>
             </v-stepper-step>
 
             <v-stepper-content :key="`${n}-content`" :step="n">
@@ -85,9 +96,39 @@
             </v-stepper-content>
           </template>
 
-          <v-stepper-step step="4" :rules="[() => stepRules[3]]" editable>
-            Pilih Verifikator Tingkat 4
-            <small v-text="`${headers[3][0]}, ${headers[3][1]}`"></small>
+          <v-stepper-step
+            step="4"
+            :rules="[() => stepRules[3] || stepRules[4]]"
+            :editable="
+              stepItem[3].pegawai == null || stepItem[4].pegawai == null
+            "
+            :complete="
+              stepItem[3].pegawai != null || stepItem[4].pegawai != null
+            "
+          >
+            Verifikator Tahap 4
+            <small class="font-weight-bold" v-text="`${headers[3][0]}`"></small>
+            <template v-if="stepItem[3].pegawai != null">
+              <small
+                v-text="`Nama : ${stepItem[3].pegawai.namaWithGelar}`"
+                class="ml-2"
+              ></small>
+              <small
+                v-text="`NIP : ${stepItem[3].pegawai.nip}`"
+                class="ml-2"
+              ></small>
+            </template>
+            <small class="font-weight-bold" v-text="`${headers[3][1]}`"></small>
+            <template v-if="stepItem[3 + 1].pegawai != null">
+              <small
+                v-text="`Nama : ${stepItem[3 + 1].pegawai.namaWithGelar}`"
+                class="ml-2"
+              ></small>
+              <small
+                v-text="`NIP : ${stepItem[3 + 1].pegawai.nip}`"
+                class="ml-2"
+              ></small>
+            </template>
           </v-stepper-step>
 
           <v-stepper-content step="4">
@@ -160,7 +201,7 @@ export default {
         ],
       ],
       defaultItem: [1, 2, 3, 4.1, 4.2].map(
-        (n) => new VerifikatorModel({ level: n })
+        (n) => new VerifikatorModel({ tahap: n })
       ),
       valid: [0, 1, 2, 3].map(() => true),
       dialogReset: false,

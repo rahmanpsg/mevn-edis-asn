@@ -10,7 +10,7 @@ const schema = mongoose.Schema(
     keterangan: String,
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Verifikator",
     },
   },
   { timestamps: true }

@@ -36,21 +36,51 @@
         {{ index + 1 }}
       </template>
 
+      <template v-slot:[`item.createdAt`]="{ item }">
+        {{ tanggalFormat(item.createdAt) }}
+      </template>
+
       <template v-slot:[`item.nama`]="{ item }">
-        {{ item.gelar_depan }}
-        {{ item.nama + (item.gelar_belakang ? "," : "") }}
-        {{ item.gelar_belakang }}
+        {{ namaGelarFormat(item) }}
+      </template>
+
+      <template v-slot:[`item.pegawai.nama`]="{ item }">
+        {{ namaGelarFormat(item.pegawai) }}
       </template>
 
       <template v-slot:[`item.jenis`]="{ item }">
         <v-chip
           class="overline font-weight-bold"
-          :color="item.jenis == 'Pidana' ? 'error' : 'warning'"
+          :color="item.jenis.toLowerCase() == 'pidana' ? 'error' : 'warning'"
           dark
           label
           v-text="item.jenis"
         >
         </v-chip>
+      </template>
+
+      <template v-slot:[`item.status`]="{ item }">
+        <v-row v-if="checkStatus(item.status)">
+          <v-col v-for="i in 4" :key="i" class="mx-n2">
+            <v-progress-linear
+              v-if="item.status[i - 1] != false"
+              background-color="secondary lighten-4"
+              color="secondary lighten-1"
+              :value="item.status[i - 1] == true ? 100 : 0"
+              :buffer-value="
+                item.status.every(Boolean)
+                  ? item.status.length == i - 1
+                    ? 0
+                    : 100
+                  : 100
+              "
+              stream
+              :class="item.status.every(Boolean) ? `` : `mt-2`"
+            ></v-progress-linear>
+            <v-icon v-else small color="error"> mdi-close-thick </v-icon>
+          </v-col>
+        </v-row>
+        <v-icon v-else color="success">mdi-check-all</v-icon>
       </template>
 
       <template v-slot:[`item.aksi`]="{ item }">
@@ -92,6 +122,8 @@
 </template>
 
 <script>
+import moment from "moment";
+
 export default {
   props: {
     headers: Array,
@@ -111,6 +143,22 @@ export default {
     selectRow(item, row) {
       row.select(!row.isSelected);
       this.$emit("update:selectedFilter", !row.isSelected ? item._id : null);
+    },
+    tanggalFormat(date) {
+      return moment(date).format("llll");
+    },
+    namaGelarFormat(item) {
+      return (
+        (item.gelar_depan ? `${item.gelar_depan} ` : "") +
+        item.nama +
+        (item.gelar_belakang ? `, ${item.gelar_belakang}` : "")
+      );
+    },
+    checkStatus(status) {
+      if (status.every(Boolean) && status.length >= 4) {
+        return;
+      }
+      return true;
     },
   },
 };

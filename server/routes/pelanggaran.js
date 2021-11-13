@@ -5,7 +5,9 @@ const auth = require("../middleware/auth");
 
 // get all data pelanggaran
 router.get("/", auth, async (req, res) => {
-  const data = await pelanggaranModel.find().populate("pegawai", "nip nama");
+  const data = await pelanggaranModel
+    .find()
+    .populate("pegawai", "nip nama gelar_depan gelar_belakang");
 
   res.send(data);
 });

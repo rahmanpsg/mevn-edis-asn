@@ -7,6 +7,7 @@ const ls = new SecureLS({ isCompression: false });
 import userModule from "./user";
 import pegawaiModule from "./pegawai";
 import verifikatorModule from "./verifikator";
+import permohonanModule from "./permohonan";
 import pelanggaranModule from "./pelanggaran";
 import golonganModule from "./golongan";
 import unorModule from "./unor";
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     userModule,
     pegawaiModule,
     verifikatorModule,
+    permohonanModule,
     pelanggaranModule,
     golonganModule,
     unorModule,

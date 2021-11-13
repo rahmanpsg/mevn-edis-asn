@@ -50,7 +50,7 @@ export default {
         if (res.status == 200)
           commit(
             "setVerifikators",
-            [1, 2, 3, 4.1, 4.2].map((n) => new verifikatorModel({ level: n }))
+            [1, 2, 3, 4.1, 4.2].map((n) => new verifikatorModel({ tahap: n }))
           );
 
         return res;

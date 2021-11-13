@@ -5,7 +5,7 @@ const schema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  level: { type: String, unique: true },
+  tahap: { type: String, unique: true },
 });
 
 module.exports = mongoose.model("Verifikator", schema);
