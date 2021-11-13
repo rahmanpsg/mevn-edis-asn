@@ -48,6 +48,14 @@ const routes = [
         component: () => import("../views/admin/pegawai.vue"),
       },
       {
+        path: "verifikator",
+        component: () => import("../views/admin/verifikator.vue"),
+      },
+      {
+        path: "permohonan",
+        component: () => import("../views/admin/permohonan.vue"),
+      },
+      {
         path: "pelanggaran",
         component: () => import("../views/admin/pelanggaran.vue"),
       },

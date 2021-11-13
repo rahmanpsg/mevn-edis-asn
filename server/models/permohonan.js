@@ -2,11 +2,12 @@ const mongoose = require("mongoose");
 
 const schema = mongoose.Schema(
   {
-    user: {
+    pegawai: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    tanggal: Date,
+    jenis: String,
+    tanggal: String,
   },
   { timestamps: true }
 );

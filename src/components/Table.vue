@@ -47,8 +47,9 @@
           class="overline font-weight-bold"
           :color="item.jenis == 'Pidana' ? 'error' : 'warning'"
           dark
+          label
+          v-text="item.jenis"
         >
-          {{ item.jenis }}
         </v-chip>
       </template>
 

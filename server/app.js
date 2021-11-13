@@ -15,6 +15,7 @@ app.use(cors());
 
 const loginRoute = require("./routes/login");
 const pegawaiRoute = require("./routes/pegawai");
+const verifikatorRoute = require("./routes/verifikator");
 const pelanggaranRoute = require("./routes/pelanggaran");
 const golonganRoute = require("./routes/golongan");
 const unorRoute = require("./routes/unor");
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 
 app.use("/login", loginRoute);
 app.use("/pegawai", pegawaiRoute);
+app.use("/verifikator", verifikatorRoute);
 app.use("/pelanggaran", pelanggaranRoute);
 app.use("/golongan", golonganRoute);
 app.use("/unor", unorRoute);
