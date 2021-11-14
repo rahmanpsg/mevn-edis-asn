@@ -20,6 +20,14 @@ export default {
         return error.response;
       }
     },
+    async getPermohonanByPegawai({ commit }, idPegawai) {
+      try {
+        const { data } = await axios.get(`permohonan/${idPegawai}`);
+        commit("setPermohonans", data);
+      } catch (error) {
+        return error.response;
+      }
+    },
     async addPermohonan({ commit, state }, permohonan) {
       try {
         const res = await axios.post("permohonan", permohonan);

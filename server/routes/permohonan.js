@@ -12,31 +12,26 @@ router.get("/", auth, async (req, res) => {
 
   const verifikasis = await verifikasiModel
     .find()
-    .populate("verifiedBy", "level")
+    .populate("verifiedBy", "tahap")
     .sort("tahap");
 
-  const data = permohonans.map((per) => {
-    const verif = verifikasis.filter((ver) => ver.permohonan == per._id);
+  const data = getVerifData(permohonans, verifikasis);
 
-    let status = [];
-    let keterangan = "Menunggu Konfirmasi Tahap 1";
+  res.send(data);
+});
 
-    if (verif != undefined) {
-      status = verif.map((v) => v.status);
-      if (status.every(Boolean)) {
-        if (status.length < 4) {
-          keterangan = `Menunggu Konfirmasi Tahap ${status.length + 1}`;
-        } else {
-          keterangan = "Permohonan Telah Selesai Di Verifikasi";
-        }
-      } else {
-        keterangan =
-          verif[verif.length - 1].keterangan ??
-          `Ditolak Pada Tahap ${status.length}`;
-      }
-    }
-    return { ...per._doc, status, keterangan };
-  });
+// get permohonan by pegawai
+router.get("/:idPegawai", auth, async (req, res) => {
+  const idPegawai = req.params.idPegawai;
+
+  const permohonans = await permohonanModel.find({ pegawai: idPegawai });
+
+  const verifikasis = await verifikasiModel
+    .find()
+    .populate("verifiedBy", "tahap")
+    .sort("tahap");
+
+  const data = getVerifData(permohonans, verifikasis);
 
   res.send(data);
 });
@@ -54,7 +49,7 @@ router.post("/", auth, async (req, res) => {
     if (err) return res.status(500).send({ message: err });
 
     res.status(200).send({
-      message: "Data permohonan berhasil disimpan",
+      message: "Permohonan berhasil dikirim",
       id: doc._id,
     });
   });
@@ -96,5 +91,30 @@ router.delete("/:id", auth, async (req, res) => {
     });
   });
 });
+
+const getVerifData = (permohonans, verifikasis) => {
+  return permohonans.map((per) => {
+    const verif = verifikasis.filter((ver) => ver.permohonan == per._id);
+
+    let status = [];
+    let keterangan = "Menunggu Konfirmasi Tahap 1";
+
+    if (verif != undefined) {
+      status = verif.map((v) => v.status);
+      if (status.every(Boolean)) {
+        if (status.length < 4) {
+          keterangan = `Menunggu Konfirmasi Tahap ${status.length + 1}`;
+        } else {
+          keterangan = "Permohonan Telah Selesai Di Verifikasi";
+        }
+      } else {
+        keterangan =
+          verif[verif.length - 1].keterangan ??
+          `Ditolak Pada Tahap ${status.length}`;
+      }
+    }
+    return { ...per._doc, status, keterangan };
+  });
+};
 
 module.exports = router;

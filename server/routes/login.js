@@ -8,45 +8,49 @@ router.post("/", async (req, res) => {
   try {
     const { username, password } = req.body;
 
-    userModel.findOne({ username }).exec((err, doc) => {
-      if (err) {
-        res.status(500).send({ message: err.message });
-        return;
-      }
-
-      if (!doc) {
-        res
-          .status(404)
-          .send({ error: true, message: "Username tidak ditemukan" });
-        return;
-      }
-
-      if (password != doc.password) {
-        res
-          .status(401)
-          .send({ error: true, message: "Username atau password salah" });
-        return;
-      }
-
-      const user = doc.toJSON();
-
-      // Create token
-      const token = jwt.sign(
-        { id: user._id, username },
-        process.env.TOKEN_KEY,
-        {
-          expiresIn: "7 days",
+    userModel
+      .findOne({ username })
+      .populate("golongan")
+      .populate({ path: "unor", populate: { path: "unor_induk" } })
+      .exec((err, doc) => {
+        if (err) {
+          res.status(500).send({ message: err.message });
+          return;
         }
-      );
 
-      user.token = token;
+        if (!doc) {
+          res
+            .status(404)
+            .send({ error: true, message: "Username tidak ditemukan" });
+          return;
+        }
 
-      res.status(200).send({
-        error: false,
-        message: "Anda berhasil login",
-        user,
+        if (password != doc.password) {
+          res
+            .status(401)
+            .send({ error: true, message: "Username atau password salah" });
+          return;
+        }
+
+        const user = doc.toJSON();
+
+        // Create token
+        const token = jwt.sign(
+          { id: user._id, username },
+          process.env.TOKEN_KEY,
+          {
+            expiresIn: "7 days",
+          }
+        );
+
+        user.token = token;
+
+        res.status(200).send({
+          error: false,
+          message: "Anda berhasil login",
+          user,
+        });
       });
-    });
   } catch (error) {
     console.log(error);
   }

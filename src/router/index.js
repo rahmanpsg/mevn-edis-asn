@@ -69,6 +69,26 @@ const routes = [
       },
     ],
   },
+  {
+    path: "/pegawai",
+    component: () => import("../views/pegawai/index.vue"),
+    beforeEnter: isLogin,
+    children: [
+      {
+        path: "",
+        name: "pegawai",
+        component: () => import("../views/pegawai/home.vue"),
+      },
+      {
+        path: "permohonan",
+        component: () => import("../views/pegawai/permohonan.vue"),
+      },
+      {
+        path: "pengaturan",
+        component: () => import("../views/pegawai/pengaturan.vue"),
+      },
+    ],
+  },
 ];
 
 const router = new VueRouter({
