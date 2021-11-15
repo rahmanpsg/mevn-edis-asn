@@ -272,7 +272,12 @@ router.get("/:id", async (req, res) => {
     });
   }
 
-  const url = process.env.baseURL + `cetak/${permohonan.id}`;
+  const url =
+    (process.env.NODE_ENV == "production"
+      ? process.env.baseURL_production
+      : process.env.baseURL) + `cetak/${permohonan.id}`;
+
+  console.log(url);
 
   const QR = await qrcode.toDataURL(url);
 

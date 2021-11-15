@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
-const { MONGO_URI } = process.env;
+const MONGO_URI =
+  process.env.NODE_ENV == "production"
+    ? process.env.MONGO_URI_production
+    : process.env.MONGO_URI;
 
 exports.connect = () => {
   // Connecting to the database
