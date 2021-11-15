@@ -53,7 +53,8 @@
                     <v-col cols="12">
                       <v-combobox
                         v-model="editedItem.jenis"
-                        :items="[`Disiplin`, `Pidana`]"
+                        :items="jenisItems"
+                        :return-object="false"
                         label="Jenis Pelanggaran*"
                         :rules="[
                           (v) => !!v || 'Jenis pelanggaran belum dipilih',
@@ -130,6 +131,10 @@ export default {
         { text: "Tanggal", value: "tanggal" },
         { text: "Keterangan", value: "keterangan" },
         { text: "Aksi", value: "aksi", sortable: false },
+      ],
+      jenisItems: [
+        { text: "Disiplin", value: "disiplin" },
+        { text: "Pidana", value: "pidana" },
       ],
       dialog: false,
       dialogLoading: false,

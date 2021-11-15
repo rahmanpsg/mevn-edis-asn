@@ -42,7 +42,11 @@
         </v-col>
 
         <v-col>
-          <v-btn small color="secondary"
+          <v-btn
+            small
+            color="secondary"
+            href="/PP 53 Tahun 2010.pdf"
+            target="_blank"
             ><v-icon left dark>mdi-download-box</v-icon> Unduh PDF
           </v-btn>
         </v-col>

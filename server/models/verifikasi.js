@@ -7,7 +7,6 @@ const schema = mongoose.Schema(
       ref: "Permohonan",
     },
     status: Boolean,
-    keterangan: String,
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Verifikator",

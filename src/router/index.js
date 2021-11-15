@@ -83,16 +83,28 @@ const routes = [
         path: "permohonan",
         component: () => import("../views/pegawai/permohonan.vue"),
       },
+    ],
+  },
+  {
+    path: "/verifikator",
+    component: () => import("../views/verifikator/index.vue"),
+    beforeEnter: isLogin,
+    children: [
       {
-        path: "pengaturan",
-        component: () => import("../views/pegawai/pengaturan.vue"),
+        path: "",
+        name: "verifikator",
+        component: () => import("../views/verifikator/home.vue"),
+      },
+      {
+        path: "permohonan",
+        component: () => import("../views/verifikator/permohonan.vue"),
       },
     ],
   },
 ];
 
 const router = new VueRouter({
-  mode: "history",
+  // mode: "history",
   base: process.env.BASE_URL,
   routes,
 });

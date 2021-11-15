@@ -1,6 +1,7 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user");
+const verifikatorModel = require("../models/verifikator");
 const router = express.Router();
 
 // login
@@ -12,7 +13,7 @@ router.post("/", async (req, res) => {
       .findOne({ username })
       .populate("golongan")
       .populate({ path: "unor", populate: { path: "unor_induk" } })
-      .exec((err, doc) => {
+      .exec(async (err, doc) => {
         if (err) {
           res.status(500).send({ message: err.message });
           return;
@@ -33,6 +34,17 @@ router.post("/", async (req, res) => {
         }
 
         const user = doc.toJSON();
+
+        // periksa jika user adalah verifikator
+        if (user.role == "pegawai") {
+          const verifikator = await verifikatorModel.findOne({ pegawai: user });
+
+          if (verifikator != null) {
+            user._id = verifikator.id;
+            user.role = "verifikator";
+            user.tahap = verifikator.tahap;
+          }
+        }
 
         // Create token
         const token = jwt.sign(

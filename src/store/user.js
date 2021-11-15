@@ -1,5 +1,6 @@
 import axios from "axios";
-import PegawaiModel from "../models/pegawai";
+import pegawaiModel from "../models/pegawai";
+import verifikatorModel from "../models/verifikator";
 
 export default {
   namespaced: true,
@@ -8,7 +9,6 @@ export default {
     username: null,
     role: null,
     token: null,
-    pegawai: new PegawaiModel({}),
   }),
   mutations: {
     isLogin: (state, login) => {
@@ -22,7 +22,12 @@ export default {
         axios.defaults.headers["x-access-token"] = data.token;
 
         if (data.role == "pegawai") {
-          state.pegawai = new PegawaiModel(data);
+          state.pegawai = new pegawaiModel(data);
+        } else if (data.role == "verifikator") {
+          state.verifikator = new verifikatorModel({
+            ...data,
+            pegawai: new pegawaiModel(data),
+          });
         }
       } catch (error) {
         console.log(error);

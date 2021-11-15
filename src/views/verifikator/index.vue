@@ -19,10 +19,9 @@
 
     <v-bottom-navigation
       :value="value"
-      color="white"
       background-color="primary"
-      app
       dark
+      app
       grow
     >
       <v-btn
@@ -31,6 +30,7 @@
         :key="`route-${i}`"
         :to="item.href"
         ref="link"
+        active-class=""
         exact
       >
         <span v-text="item.text"></span>
@@ -47,10 +47,10 @@ export default {
       value: "Home",
       drawer: false,
       items: [
-        { text: "Home", href: "/pegawai", icon: "mdi-home" },
+        { text: "Home", href: "/verifikator", icon: "mdi-home" },
         {
           text: "Permohonan",
-          href: "/pegawai/permohonan",
+          href: "/verifikator/permohonan",
           icon: "mdi-email-send",
         },
       ],

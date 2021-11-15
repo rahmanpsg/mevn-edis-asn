@@ -22,4 +22,21 @@ const schema = mongoose.Schema(
   { timestamps: true }
 );
 
+schema.pre("deleteOne", function (next) {
+  const pelanggarans = mongoose.model("Pelanggaran");
+  const permohonans = mongoose.model("Permohonan");
+
+  const id = this.getQuery()["_id"];
+
+  pelanggarans.deleteMany({ pegawai: id }, (err) => {
+    if (err) next(err);
+    next();
+  });
+
+  permohonans.deleteMany({ pegawai: id }, (err) => {
+    if (err) next(err);
+    next();
+  });
+});
+
 module.exports = mongoose.model("User", schema);

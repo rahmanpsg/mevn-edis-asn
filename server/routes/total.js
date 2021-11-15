@@ -19,23 +19,24 @@ router.get("/", auth, async (req, res) => {
   ]);
 
   const totalPermohonan = await permohonanModel.countDocuments();
-  const totalPermohonanDiproses = verifikasis
-    .map((verif) => verif.status.length < 4 && verif.status.every(Boolean))
+
+  const totalPermohonanDiterima = verifikasis
+    .map((verif) => verif.status.length == 4 && verif.status.every(Boolean))
     .filter(Boolean).length;
-  const totalPermohonanDiterima =
-    totalPermohonan -
-    verifikasis
-      .map((verif) => verif.status.length >= 4 && verif.status.every(Boolean))
-      .filter(Boolean).length;
-  const totalPermohonanDitolak =
-    totalPermohonan - (totalPermohonanDiproses + totalPermohonanDiterima);
+
+  const totalPermohonanDitolak = verifikasis
+    .map((verif) => verif.status.includes(false))
+    .filter(Boolean).length;
+
+  const totalPermohonanDiproses =
+    totalPermohonan - (totalPermohonanDiterima + totalPermohonanDitolak);
 
   res.send({
     totalPegawai,
     totalPermohonan,
-    totalPermohonanDiproses,
     totalPermohonanDiterima,
     totalPermohonanDitolak,
+    totalPermohonanDiproses,
   });
 });
 

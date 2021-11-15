@@ -21,6 +21,7 @@ const pelanggaranRoute = require("./routes/pelanggaran");
 const golonganRoute = require("./routes/golongan");
 const unorRoute = require("./routes/unor");
 const totalRoute = require("./routes/total");
+const cetakRoute = require("./routes/cetak");
 
 app.use(express.static("./dist/"));
 
@@ -36,5 +37,6 @@ app.use("/pelanggaran", pelanggaranRoute);
 app.use("/golongan", golonganRoute);
 app.use("/unor", unorRoute);
 app.use("/total", totalRoute);
+app.use("/cetak", cetakRoute);
 
 module.exports = app;

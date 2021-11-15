@@ -1,6 +1,7 @@
 const express = require("express");
 const permohonanModel = require("../models/permohonan");
 const verifikasiModel = require("../models/verifikasi");
+const verifikatorModel = require("../models/verifikator");
 const router = express.Router();
 const auth = require("../middleware/auth");
 
@@ -21,19 +22,74 @@ router.get("/", auth, async (req, res) => {
 });
 
 // get permohonan by pegawai
-router.get("/:idPegawai", auth, async (req, res) => {
-  const idPegawai = req.params.idPegawai;
+router.get("/pegawai/:id", auth, async (req, res) => {
+  const id = req.params.id;
 
-  const permohonans = await permohonanModel.find({ pegawai: idPegawai });
+  const permohonans = await permohonanModel.find({ pegawai: id });
 
   const verifikasis = await verifikasiModel
-    .find()
+    .find({ permohonan: { $in: permohonans } })
     .populate("verifiedBy", "tahap")
     .sort("tahap");
 
   const data = getVerifData(permohonans, verifikasis);
 
   res.send(data);
+});
+
+// get permohonan by verifikator
+router.get("/verifikator/:id", auth, async (req, res) => {
+  const id = req.params.id;
+
+  const verifikator = await verifikatorModel.findOne({ _id: id });
+
+  const permohonans = await permohonanModel.find().populate({
+    path: "pegawai",
+    select: "-password -role -createdAt -updatedAt",
+    populate: [
+      { path: "golongan" },
+      { path: "unor", populate: { path: "unor_induk" } },
+    ],
+  });
+
+  const verifikasis = await verifikasiModel
+    .find({
+      permohonan: { $in: permohonans },
+    })
+    .populate("verifiedBy", "tahap")
+    .sort("tahap");
+
+  const data = getVerifData(permohonans, verifikasis);
+
+  let filter;
+
+  // periksa tahap verifikasi
+  if (Math.floor(verifikator.tahap) == 4) {
+    // 4.1 Disiplin
+    // 4.2 Pidana
+    const jenis = verifikator.tahap == 4.1 ? "disiplin" : "pidana";
+    filter = data.filter((d) => d.status.length >= 3 && d.jenis == jenis);
+  } else {
+    filter = data.filter((d) => d.status.length >= verifikator.tahap - 1);
+  }
+
+  res.send(filter);
+});
+
+// verifikasi data permohonan
+router.post("/verifikasi", auth, async (req, res) => {
+  const verifikasi = new verifikasiModel(req.body);
+
+  verifikasi.save((err, doc) => {
+    if (err) return res.status(500).send({ message: err.message });
+
+    res.status(200).send({
+      message:
+        "Permohonan berhasil " +
+        `${verifikasi.status ? "diterima" : "ditolak"}`,
+      waktuVerif: doc.createdAt,
+    });
+  });
 });
 
 // save data permohonan
@@ -46,7 +102,7 @@ router.post("/", auth, async (req, res) => {
   });
 
   permohonans.save((err, doc) => {
-    if (err) return res.status(500).send({ message: err });
+    if (err) return res.status(500).send({ message: err.message });
 
     res.status(200).send({
       message: "Permohonan berhasil dikirim",
@@ -94,9 +150,12 @@ router.delete("/:id", auth, async (req, res) => {
 
 const getVerifData = (permohonans, verifikasis) => {
   return permohonans.map((per) => {
-    const verif = verifikasis.filter((ver) => ver.permohonan == per._id);
+    const verif = verifikasis.filter(
+      (ver) => ver.permohonan.toString() == per._id.toString()
+    );
 
     let status = [];
+    let waktuVerif = [];
     let keterangan = "Menunggu Konfirmasi Tahap 1";
 
     if (verif != undefined) {
@@ -112,8 +171,10 @@ const getVerifData = (permohonans, verifikasis) => {
           verif[verif.length - 1].keterangan ??
           `Ditolak Pada Tahap ${status.length}`;
       }
+
+      waktuVerif = verif.map((ver) => ver.createdAt);
     }
-    return { ...per._doc, status, keterangan };
+    return { ...per._doc, status, waktuVerif, keterangan };
   });
 };
 

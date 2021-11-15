@@ -15,7 +15,7 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn href="/login" text>
+      <v-btn to="/login" text>
         <span class="mr-2">Masuk</span>
         <v-icon>mdi-login</v-icon>
       </v-btn>

@@ -5,20 +5,20 @@
         <v-hover v-slot="{ hover }">
           <v-card class="cardBtn" tile @click="sheet = true">
             <v-row class="no-gutters">
-              <div class="col-auto">
+              <v-col cols="4" sm="12" lg="4">
                 <div
                   class="secondary fill-height d-flex pa-5"
                   :class="hover ? `lighten-1` : ``"
                 >
                   <v-icon size="35" color="white"> mdi-email-plus</v-icon>
                 </div>
-              </div>
-              <div
-                class="col pa-3 py-7 secondary--text"
+              </v-col>
+              <v-col
+                class="pa-3 py-7 secondary--text"
                 :class="hover ? `secondary lighten-5` : ``"
               >
                 <h5 class="text-truncate text-uppercase">Buat Permohonan</h5>
-              </div>
+              </v-col>
             </v-row>
           </v-card>
         </v-hover>
@@ -27,7 +27,8 @@
       <v-col cols="12">
         <v-card tile>
           <v-card-title class="white--text primary">
-            <h3>Informasi</h3>
+            <h4 v-if="!permohonans.length">Informasi</h4>
+            <h4 v-else>Daftar Permohonan</h4>
             <v-spacer></v-spacer>
             <v-icon large color="white">mdi-information</v-icon>
           </v-card-title>
@@ -47,7 +48,7 @@
             <v-row
               v-else
               class="no-gutters"
-              v-for="(permohonan, i) in permohonans"
+              v-for="(permohonan, i) in permohonans.slice().reverse()"
               :key="i"
             >
               <v-col cols="12" class="overline">
@@ -89,7 +90,10 @@
                 </v-stepper>
               </v-col>
               <v-col cols="12" class="text-right my-4">
-                <v-btn color="success" :disabled="!btnCetakAktif[i]"
+                <v-btn
+                  color="success"
+                  @click="cetakClick(permohonan._id)"
+                  :disabled="!btnCetakAktif[i]"
                   ><v-icon left>mdi-printer</v-icon> Cetak</v-btn
                 >
               </v-col>
@@ -98,29 +102,6 @@
           </v-card-text>
         </v-card>
       </v-col>
-
-      <!-- <v-col cols="12" sm="3" md="3" class="pb-2">
-        <v-hover v-slot="{ hover }">
-          <v-card class="cardBtn" tile>
-            <v-row class="no-gutters">
-              <div class="col-auto">
-                <div
-                  class="success fill-height d-flex pa-5"
-                  :class="hover ? `lighten-1` : ``"
-                >
-                  <v-icon size="35" color="white"> mdi-printer</v-icon>
-                </div>
-              </div>
-              <div
-                class="col pa-3 py-7 success--text"
-                :class="hover ? `success lighten-5` : ``"
-              >
-                <h5 class="text-truncate text-uppercase">Cetak Permohonan</h5>
-              </div>
-            </v-row>
-          </v-card>
-        </v-hover>
-      </v-col> -->
     </v-row>
     <v-bottom-sheet v-model="sheet" persistent>
       <v-list>
@@ -147,6 +128,14 @@
       @closeDialog="dialog = false"
     />
 
+    <template v-if="dialogCetak">
+      <DialogCetak
+        :dialog="dialogCetak"
+        @closeDialog="dialogCetak = false"
+        :idPermohonan.sync="idPermohonan"
+      />
+    </template>
+
     <SnackbarResponse :response="response" />
   </v-container>
 </template>
@@ -154,17 +143,20 @@
 <script>
 import moment from "moment";
 import DialogCustom from "@/components/DialogCustom.vue";
+import DialogCetak from "@/components/DialogCetak.vue";
 import SnackbarResponse from "@/components/SnackbarResponse.vue";
 import { mapState, mapActions } from "vuex";
 
 import PermohonanModel from "@/models/permohonan";
 
 export default {
-  components: { DialogCustom, SnackbarResponse },
+  components: { DialogCustom, DialogCetak, SnackbarResponse },
   data: () => ({
+    idPermohonanSelected: null,
     stepper: 0,
     sheet: false,
     dialog: false,
+    dialogCetak: false,
     dialogLoading: false,
     loading: false,
     jenis: null,
@@ -186,10 +178,14 @@ export default {
           : "tidak sedang menjalani proses pidana atau pernah dipenjara"
       }  akan dikirim?`;
     },
+    idPermohonan() {
+      return this.idPermohonanSelected;
+    },
     btnCetakAktif() {
-      return this.permohonans.map(
-        (per) => per.status.every(Boolean) && per.status.length == 4
-      );
+      return this.permohonans
+        .slice()
+        .reverse()
+        .map((per) => per.status.every(Boolean) && per.status.length == 4);
     },
   },
   methods: {
@@ -197,6 +193,10 @@ export default {
       "getPermohonanByPegawai",
       "addPermohonan",
     ]),
+    cetakClick(idPermohonanSelected) {
+      this.idPermohonanSelected = idPermohonanSelected;
+      this.dialogCetak = true;
+    },
     disiplinClick() {
       this.sheet = false;
       this.dialog = true;
