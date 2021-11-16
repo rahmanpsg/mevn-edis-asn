@@ -7,6 +7,8 @@ const FileSystem = require("fs");
 const path = require("path");
 const moment = require("moment");
 const qrcode = require("qrcode");
+const fetch = (...args) =>
+  import("node-fetch").then(({ default: fetch }) => fetch(...args));
 
 // generete PDF Permohonan
 router.get("/:id", async (req, res) => {
@@ -21,6 +23,10 @@ router.get("/:id", async (req, res) => {
     ],
   });
 
+  if (permohonan == null) {
+    res.send({ error: true, message: "ID permohonan tidak ditemukan" });
+  }
+
   const tahap = permohonan.jenis == "disiplin" ? 4.1 : 4.2;
 
   const verifikator = await verifikatorModel.findOne({ tahap }).populate({
@@ -34,18 +40,27 @@ router.get("/:id", async (req, res) => {
     margins: { top: 10, left: 30, right: 30, bottom: 10 },
   });
 
-  const font = FileSystem.readFileSync(
-    path.resolve(__dirname, "../../public/BOOKOS.ttf")
-  );
-  const font2 = FileSystem.readFileSync(
-    path.resolve(__dirname, "../../public/BOOKOSB.ttf")
-  );
-  const font3 = FileSystem.readFileSync(
-    path.resolve(__dirname, "../../public/BOOKOSI.ttf")
-  );
-  doc.registerFont("bookman", font);
-  doc.registerFont("bookman-bold", font2);
-  doc.registerFont("bookman-italic", font3);
+  try {
+    const listFont = [
+      { name: "regular", file: "BOOKOS.TTF" },
+      { name: "bold", file: "BOOKOSB.TTF" },
+      { name: "italic", file: "BOOKOSI.TTF" },
+    ];
+
+    const _path =
+      process.env.NODE_ENV == "production"
+        ? process.env.baseURL_production
+        : process.env.baseURL;
+
+    for (const font of listFont) {
+      const response = await fetch(_path + font.file);
+      const buffer = await response.arrayBuffer();
+
+      doc.registerFont(font.name, buffer);
+    }
+  } catch (error) {
+    console.log(error);
+  }
 
   res.writeHead(200, {
     "Content-Type": "application/pdf",
@@ -65,16 +80,14 @@ router.get("/:id", async (req, res) => {
   doc.moveDown();
 
   doc
-    .font("bookman")
+    .font("regular")
     .fontSize(12)
     .text("PEMERINTAH KABUPATEN SIDENRENG RAPPANG", { align: "center" });
 
-  doc
-    .font("bookman-bold")
-    .text("SEKRETARIAT DAERAH KABUPATEN", { align: "center" });
+  doc.font("bold").text("SEKRETARIAT DAERAH KABUPATEN", { align: "center" });
 
   doc
-    .font("bookman")
+    .font("regular")
     .fontSize(10)
     .text("Jl. HARAPAN BARU KOMPLEKS SKPD BLOK A NO. 1 PANGKAJENE SIDENRENG", {
       align: "center",
@@ -91,21 +104,18 @@ router.get("/:id", async (req, res) => {
 
   doc.moveDown();
 
-  doc
-    .font("bookman-bold")
-    .fontSize(13)
-    .text("SURAT PERNYATAAN", { align: "center" });
+  doc.font("bold").fontSize(13).text("SURAT PERNYATAAN", { align: "center" });
 
   if (permohonan.jenis == "disiplin") {
     doc
-      .font("bookman-bold")
+      .font("bold")
       .text("TIDAK PERNAH DIJATUHI HUKUMAN DISIPLIN TINGKAT BERAT/ SEDANG", {
         align: "center",
         underline: true,
       });
   } else {
     doc
-      .font("bookman-bold")
+      .font("bold")
       .fontSize(11)
       .text(
         "TIDAK SEDANG MENJALANI PROSES PIDANA ATAU PERNAH DIPIDANA PENJARA",
@@ -130,7 +140,7 @@ router.get("/:id", async (req, res) => {
       ? "NOMOR : 881.3/              /BKPSDM"
       : "NOMOR : 800 /";
 
-  doc.font("bookman").text(nomorSurat, {
+  doc.font("regular").text(nomorSurat, {
     align: "center",
   });
 
@@ -219,12 +229,12 @@ router.get("/:id", async (req, res) => {
       ? "SEKRETARIS DAERAH KABUPATEN"
       : "ASISTEN PEMERINTAHAN DAN KESRA";
 
-  doc.font("bookman-bold").text(jabatan);
+  doc.font("bold").text(jabatan);
 
   doc.moveDown(7);
 
   doc
-    .font("bookman")
+    .font("regular")
     .text(namaGelarFormat(verifikator.pegawai), { underline: true });
 
   x = 300;
@@ -243,7 +253,7 @@ router.get("/:id", async (req, res) => {
 
   doc.x = 30;
 
-  doc.font("bookman-italic").fontSize(9).text("Tembusan :");
+  doc.font("italic").fontSize(9).text("Tembusan :");
 
   let listTembusan;
 
