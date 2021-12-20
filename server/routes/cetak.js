@@ -3,8 +3,6 @@ const router = express.Router();
 const PDFDocument = require("pdfkit");
 const permohonanModel = require("../models/permohonan");
 const verifikatorModel = require("../models/verifikator");
-const FileSystem = require("fs");
-const path = require("path");
 const moment = require("moment");
 const qrcode = require("qrcode");
 const fetch = (...args) =>
