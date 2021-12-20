@@ -290,7 +290,7 @@ router.get("/:id", async (req, res) => {
 
   const QR = await qrcode.toDataURL(url);
 
-  doc.image(QR, doc.x, y, { fit: [120, 120] });
+  doc.image(QR, doc.x + 250, y + 12, { fit: [90, 90] });
 
   doc.end();
 });
