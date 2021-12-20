@@ -107,6 +107,7 @@ router.get("/:id", async (req, res) => {
   if (permohonan.jenis == "disiplin") {
     doc
       .font("bold")
+      .fontSize(11)
       .text("TIDAK PERNAH DIJATUHI HUKUMAN DISIPLIN TINGKAT BERAT/ SEDANG", {
         align: "center",
         underline: true,
