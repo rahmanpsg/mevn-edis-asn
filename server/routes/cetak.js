@@ -47,7 +47,7 @@ router.get("/:id", async (req, res) => {
 
     const _path =
       process.env.NODE_ENV == "production"
-        ? process.env.baseURL_production
+        ? "https://edis-asn.netlify.app/"
         : process.env.baseURL;
 
     for (const font of listFont) {
