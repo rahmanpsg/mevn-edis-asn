@@ -200,7 +200,7 @@ export default {
     nipRules() {
       return [
         (v) => !!v || "NIP tidak boleh kosong",
-        (v) => (v && v.length >= 18) || "NIP minimal 18 karakter",
+        (v) => (v && v.length == 18) || "NIP harus 18 karakter",
         (v) => {
           return (
             (this.editedIndex != -1 && this.items[this.editedIndex].nip == v) ||
